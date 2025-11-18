@@ -1,0 +1,17 @@
+AI Engineer – Project Specification
+
+Overview
+Build a Python-based ML service that supports model inference and/or training. The use case can be freely chosen and is not the primary point of evaluation. Some examples of possible projects:
+Simple classifier service that supports creating new models through an API (possibly with model configuration parameters), training models, and running inference with trained models
+LLM service that integrates external components (e.g. vector DB, web search) to retrieve information relevant to user queries
+A service that uses pre-trained models (e.g. from Hugging Face) and exposes an endpoint where users can submit samples for inference (e.g. classifying a piece of text)
+Project time estimate: 6-8 hours
+Requirements
+Project defines an API, possibly with multiple endpoints
+Code quality: readability, modularity, error handling
+Best practices: project structure, testing, reproducibility, maintainability
+Deliverables
+GitHub repository
+Presentation of the project (10-15 minutes)
+Notes
+We want to see how you would build a fully-fledged software project, so try focusing more on applying best practices and clean code. Even a simple project can impress if it’s well written 😊
