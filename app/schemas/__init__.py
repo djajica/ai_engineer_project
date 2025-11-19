@@ -1,23 +1,8 @@
-from .inference import InferenceRequest, InferenceResponse, PredictionResult
-from .model import ModelInfo
-from .training import (
-    SentimentLabel,
-    TextSample,
-    TrainingConfig,
-    TrainingMetrics,
-    TrainingRequest,
-    TrainingResponse,
-)
+from .ingest_schema import IngestResponse
+from .query_schema import QueryRequest, QueryResponse
 
 __all__ = [
-    "InferenceRequest",
-    "InferenceResponse",
-    "PredictionResult",
-    "ModelInfo",
-    "SentimentLabel",
-    "TextSample",
-    "TrainingConfig",
-    "TrainingMetrics",
-    "TrainingRequest",
-    "TrainingResponse",
+    "QueryRequest",
+    "QueryResponse",
+    "IngestResponse",
 ]
