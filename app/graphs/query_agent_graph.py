@@ -82,7 +82,25 @@ class QueryAgentGraph:
         or "today", use Tavily. Otherwise, Weaviate.
         """
         query = state.get("query", "").lower()
-        web_keywords = ["recent", "latest", "current", "news", "today", "now", "2024", "2025"]
+        web_keywords = [
+            "recent",
+            "recently",
+            "latest",
+            "breaking",
+            "current",
+            "news",
+            "update",
+            "updated",
+            "trend",
+            "trending",
+            "today",
+            "now",
+            "release",
+            "announcement",
+            "2024",
+            "2025",
+            "2026",
+        ]
 
         use_weaviate = not any(keyword in query for keyword in web_keywords)
 

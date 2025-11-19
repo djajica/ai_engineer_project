@@ -1,6 +1,6 @@
 from app.graphs.query_agent_graph import QueryAgentGraph
 from app.repositories.weaviate_repository import WeaviateRepository
-from app.schemas.query import QueryRequest, QueryResponse
+from app.schemas.query_schema import QueryRequest, QueryResponse
 
 
 class QueryService:

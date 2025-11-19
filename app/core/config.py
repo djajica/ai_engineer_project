@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     tavily_api_key: str | None = None
     openai_api_key: str | None = None
     weaviate_url: str = "http://localhost:8080"
+    weaviate_grpc_port: int | None = None
     weaviate_api_key: str | None = None
     weaviate_collection_name: str = "Documents"
     allow_weaviate_fallback: bool = True

@@ -20,6 +20,7 @@ class AppContainer:
             collection_name=self.settings.weaviate_collection_name,
             openai_api_key=self.settings.openai_api_key,
             allow_fallback=self.settings.allow_weaviate_fallback,
+            grpc_port=self.settings.weaviate_grpc_port,
         )
 
         # Initialize query agent graph

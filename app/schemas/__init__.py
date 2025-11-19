@@ -1,5 +1,5 @@
-from .ingest import IngestResponse
-from .query import QueryRequest, QueryResponse
+from .ingest_schema import IngestResponse
+from .query_schema import QueryRequest, QueryResponse
 
 __all__ = [
     "QueryRequest",

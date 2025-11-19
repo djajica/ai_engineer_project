@@ -20,6 +20,7 @@ class WeaviateRepository:
         collection_name: str = "Documents",
         openai_api_key: str | None = None,
         allow_fallback: bool = False,
+        grpc_port: int | None = None,
     ) -> None:
         """
         Initialize Weaviate client.
@@ -38,7 +39,7 @@ class WeaviateRepository:
         self.client = None
 
         try:
-            self.client = self._connect(url=url, auth=auth)
+            self.client = self._connect(url=url, auth=auth, grpc_port_override=grpc_port)
         except (WeaviateConnectionError, WeaviateBaseError, HTTPXConnectError, OSError) as exc:
             if allow_fallback:
                 self._offline = True
@@ -117,6 +118,81 @@ class WeaviateRepository:
                     properties=properties,
                     uuid=weaviate.util.generate_uuid5(properties),
                 )
+    def get_status(self) -> dict[str, Any]:
+        """Return basic health info and collection statistics."""
+        status: dict[str, Any] = {
+            "collection": self.collection_name,
+            "online": False,
+        }
+
+        if self.client is None:
+            status["message"] = "Weaviate client unavailable (offline mode)."
+            return status
+
+        try:
+            collection = self.client.collections.get(self.collection_name)
+        except Exception as exc:
+            status["message"] = f"Unable to access collection: {exc}"
+            return status
+
+        status["online"] = True
+
+        try:
+            config = collection.config.get()
+            status["schema"] = {
+                "name": config.name,
+                "description": getattr(config, "description", None),
+                "vectorizer": getattr(config, "vectorizer", None),
+                "module_config": getattr(config, "module_config", None),
+                "properties": [prop.name for prop in getattr(config, "properties", [])],
+            }
+        except Exception as exc:
+            status["schema_error"] = str(exc)
+
+        try:
+            aggregate = collection.aggregate.over_all(total_count=True)
+            status["object_count"] = aggregate.total_count or 0
+        except Exception as exc:
+            status["aggregation_error"] = str(exc)
+
+        return status
+
+    def list_objects(self, limit: int = 20) -> list[dict[str, Any]]:
+        """Return recent objects stored in the collection."""
+        if self.client is None:
+            self._logger.debug("Offline Weaviate repo - cannot list objects")
+            return []
+
+        try:
+            collection = self.client.collections.get(self.collection_name)
+        except Exception as exc:
+            self._logger.error("Unable to read collection %s: %s", self.collection_name, exc)
+            return []
+
+        try:
+            response = collection.query.fetch_objects(limit=limit)
+        except Exception as exc:
+            self._logger.error("Error fetching objects from Weaviate: %s", exc)
+            return []
+
+        items: list[dict[str, Any]] = []
+        for obj in response.objects or []:
+            properties = obj.properties or {}
+            metadata = {k: v for k, v in properties.items() if k != "text"}
+            entry: dict[str, Any] = {
+                "id": str(obj.uuid),
+                "text": properties.get("text", ""),
+                "metadata": metadata,
+            }
+
+            if obj.metadata:
+                entry["distance"] = getattr(obj.metadata, "distance", None)
+                entry["created"] = getattr(obj.metadata, "creation_time", None)
+                entry["updated"] = getattr(obj.metadata, "last_update_time", None)
+
+            items.append(entry)
+
+        return items
 
     def _create_collection(self) -> None:
         """Create the Documents collection if it doesn't exist."""
@@ -156,7 +232,12 @@ class WeaviateRepository:
         if self.client:
             self.client.close()
 
-    def _connect(self, url: str, auth: weaviate.auth.AuthApiKey | None):
+    def _connect(
+        self,
+        url: str,
+        auth: weaviate.auth.AuthApiKey | None,
+        grpc_port_override: int | None = None,
+    ):
         """Create a Weaviate client for the provided URL."""
         url_clean = url.replace("http://", "").replace("https://", "")
         is_secure = url.startswith("https://")
@@ -167,7 +248,7 @@ class WeaviateRepository:
             host = url_clean
             port = "443" if is_secure else "8080"
 
-        if host in ("localhost", "127.0.0.1") and not is_secure:
+        if host in ("localhost", "127.0.0.1") and not is_secure and grpc_port_override is None:
             import weaviate.classes.init as wvc
 
             return weaviate.connect_to_custom(
@@ -183,7 +264,11 @@ class WeaviateRepository:
                 ),
             )
 
-        grpc_port = str(int(port) + 1) if port.isdigit() and not is_secure else "50051"
+        if grpc_port_override is not None:
+            grpc_port = str(grpc_port_override)
+        else:
+            grpc_port = str(int(port) + 1) if port.isdigit() and not is_secure else "50051"
+
         return weaviate.connect_to_custom(
             http_host=host,
             http_port=port,

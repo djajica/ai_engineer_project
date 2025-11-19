@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from app.api.dependencies import get_weaviate_repository
 from app.repositories.weaviate_repository import WeaviateRepository
-from app.schemas.ingest import IngestResponse
+from app.schemas.ingest_schema import IngestResponse
 from app.utils.pdf_parser import parse_pdf
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])

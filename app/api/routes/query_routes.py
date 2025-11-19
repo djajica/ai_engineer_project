@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_query_service
-from app.schemas.query import QueryRequest, QueryResponse
+from app.schemas.query_schema import QueryRequest, QueryResponse
 from app.services.query_service import QueryService
 
 router = APIRouter(prefix="/query", tags=["query"])
