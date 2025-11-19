@@ -15,6 +15,17 @@ class Settings(BaseSettings):
     app_port: int = 8000
     external_base_url: str | None = None
 
+    anthropic_api_key: str | None = None
+    tavily_api_key: str | None = None
+    openai_api_key: str | None = None
+    weaviate_url: str = "http://localhost:8080"
+    weaviate_api_key: str | None = None
+    weaviate_collection_name: str = "Documents"
+    allow_weaviate_fallback: bool = True
+
+    langchain_api_key: str | None = None
+    langchain_tracing_v2: bool = False
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Return cached application settings."""
